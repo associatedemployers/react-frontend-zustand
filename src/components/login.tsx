@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { TextInput, PasswordInput, Tooltip } from '@mantine/core';
 import { ButtonProgress } from './buttons/progressButton.tsx';
-function Email() {
+import { useInterval } from '@mantine/hooks';
+import { createStyles, Button, Progress, Checkbox, Group, Box } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useStore } from '../store';
+
+
+function Email(fromProps) {
   return (
     <TextInput
       label="Email"
       placeholder="Your email"
+      {...fromProps}
     />
   );
 }
 
-function Password() {
+function Password(fromProps) {
   const [opened, setOpened] = useState(false);
   const [value, setValue] = useState('');
   const valid = value.trim().length >= 6;
@@ -31,15 +38,11 @@ function Password() {
         mt="md"
         value={value}
         onChange={(event) => setValue(event.currentTarget.value)}
+        {...fromProps}
       />
     </Tooltip>
   );
 }
-
-
-import { useState } from 'react';
-import { useInterval } from '@mantine/hooks';
-import { createStyles, Button, Progress } from '@mantine/core';
 
 const useStyles = createStyles((theme) => ({
   button: {
@@ -60,13 +63,32 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-
 export function InputTooltip() {
+  const [login] = useStore(
+    (state) => [state.login],
+  )
+
+  const form = useForm({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+    },
+  });
+
   return (
     <>
-      <Email />
-      <Password />
-      <ButtonProgress />
+      <form id='my-form' onSubmit={form.onSubmit(async (values) => {
+        await login(values.password, values.email)
+        }
+      )}>
+        <Email {...form.getInputProps('email')}/>
+        <Password {...form.getInputProps('password')}/>
+        <ButtonProgress form={form} />
+      </form>
     </>
   );
 }

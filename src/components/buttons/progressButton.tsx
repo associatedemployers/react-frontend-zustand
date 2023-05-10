@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInterval } from '@mantine/hooks';
 import { createStyles, Button, Progress } from '@mantine/core';
+import { useStore } from '../../store';
 
 const useStyles = createStyles((theme) => ({
   button: {
@@ -21,18 +22,25 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function ButtonProgress() {
+export function ButtonProgress({form}) {
+    const [loggedIn] = useStore(
+    (state) => [state.status],
+  )
   const { classes, theme } = useStyles();
   const [progress, setProgress] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const [loadingError, setLoadingError] = useState(false);
 
-  let signin = (password, email) => {
-   //make a fetch call to the backend
-    fetch('http://localhost:3000/login', {
-      method: 'GET',
-      // body: JSON.stringify({ password: password, email: email })
-    })
- }
+  useEffect(() => {    
+    if (loggedIn === 'fulfilled') {
+      interval.stop()
+      setLoaded(true)
+    }
+
+    if (loggedIn === "pending") {
+     loaded ? setLoaded(false) : !interval.active && interval.start()
+    }
+   }, [loggedIn])
 
   const interval = useInterval(
     () =>
@@ -50,13 +58,14 @@ export function ButtonProgress() {
 
   return (
     <Button
+      form="my-form"
+      type="submit"
       fullWidth
       className={classes.button}
-      onClick={() => (signin("1234", 'jack@gmial.com'))}
-      color={loaded ? 'teal' : theme.primaryColor}
+      color={loaded && !loadingError && loggedIn ? 'teal' : theme.primaryColor}
     >
       <div className={classes.label}>
-        {progress !== 0 ? 'Looking for Waldo' : loaded ? 'Logged In' : 'Login'}
+        {progress !== 0 ? 'Looking for some Dragon Glass...' : loaded && !loadingError && loggedIn ? 'Logged In (Aria, is ready)'  : 'Login'}
       </div>
       {progress !== 0 && (
         <Progress
