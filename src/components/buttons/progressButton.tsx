@@ -33,8 +33,8 @@ export function ButtonProgress({form}) {
 
   useEffect(() => {    
     if (loggedIn === 'fulfilled') {
-      interval.stop()
       setLoaded(true)
+      interval.stop()
     }
 
     if (loggedIn === "pending") {

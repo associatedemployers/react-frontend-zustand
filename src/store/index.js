@@ -7,11 +7,12 @@ export  const useStore = create(
       rocks: 0,
       employee: { name: 'Jeremy', age: 35 },
       status: null,
+      user: null,
       addRocks: () => set({ rocks: get().rocks + 1 }),
       login: async (password, email) => {
         set({ status: "pending" })
         const response = await fetch(`http://localhost:3000/login?password=${password}&email=${email}`,{ method: 'GET' });
-        set({ rocks: await response.json() })
+        set({ user: await response.json() })
         set({ status: 'fulfilled' })
       },
     }),
